@@ -11,12 +11,15 @@
 // something to see when the page first loads.
 
 
-const STORE = [
+const STORE = 
+{items:[
   {id: cuid(), name: 'apples', checked: false},
   {id: cuid(), name: 'oranges', checked: false},
   {id: cuid(), name: 'milk', checked: true},
   {id: cuid(), name: 'bread', checked: false}
-];
+],
+hidCompleted:false
+};
 
 
 function generateItemElement(item) {
@@ -44,8 +47,14 @@ function renderShoppingList() {
   // this function will be responsible for rendering the shopping list in
   // the DOM
   console.log('`renderShoppingList` ran');
+  let filterItems = STORE.items;
+  if (STORE.hidCompleted){
+    filterItems = filterItems.filter(item =>!item.checked);
+  }
+
+
   
-  const shoppingListItemsString = generateShoppinglist(STORE);
+  const shoppingListItemsString = generateShoppinglist(filterItems);
   $('.js-shopping-list').html(shoppingListItemsString);
 }
 
@@ -58,7 +67,7 @@ function handleNewItemSubmit() {
     $(this).find('.js-shopping-list-entry').val('');
     console.log(itemName);
     console.log('`handleNewItemSubmit` ran');
-    STORE.push({id: cuid(), name: itemName, checked: false});
+    STORE.items.push({id: cuid(), name: itemName, checked: false});
     renderShoppingList();
   });
   
@@ -69,7 +78,7 @@ function getItemIdFromElement(item){
 }
 
 function updateItemToggleChecked(itemId){
-  const item = STORE.find(item => item.id ===itemId);
+  const item = STORE.items.find(item => item.id ===itemId);
   item.checked = !item.checked;
   renderShoppingList();
   
@@ -90,8 +99,8 @@ function handleItemCheckClicked() {
 }
 
 function deleteItemFromStore(itemId){
-  const deleteItemIndex =STORE.findIndex(item => item.id ===itemId);
-  STORE.splice(deleteItemIndex,1);
+  const deleteItemIndex =STORE.items.findIndex(item => item.id ===itemId);
+  STORE.items.splice(deleteItemIndex,1);
 }
 
 function handleDeleteItemClicked() {
@@ -105,6 +114,14 @@ function handleDeleteItemClicked() {
   console.log('`handleDeleteItemClicked` ran');
 }
 
+function handleHiddenCompleted(){
+  $('.js-hide-completed-toggle').on('click',function(event){
+    STORE.hidCompleted = !STORE.hidCompleted;
+    console.log('handleHiddenCompleted ran',STORE.hidCompleted);
+    renderShoppingList();
+  });
+}
+
 // this function will be our callback when the page loads. it's responsible for
 // initially rendering the shopping list, and activating our individual functions
 // that handle new item submission and user clicks on the "check" and "delete" buttons
@@ -114,7 +131,7 @@ function handleShoppingList() {
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
-
+  handleHiddenCompleted();
 }
 
 // when the page loads, call `handleShoppingList`
